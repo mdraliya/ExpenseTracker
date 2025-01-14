@@ -1,0 +1,201 @@
+﻿@page "/add-user"
+@using ExpenseTracker.Components.Layout
+@using ExpenseTracker.Models
+@using ExpenseTracker.Services
+@inject IUserService userService
+@inject NavigationManager navigationManager
+
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f8f8e6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .register-container {
+        display: flex;
+        background-color: #fffff7;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 70%;
+        max-width: 900px;
+        overflow: hidden;
+    }
+
+    .register-box {
+        padding: 20px;
+        flex: 1;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .register-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #3c82b3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+        .register-btn:hover {
+            background-color: #306f94;
+        }
+
+    .illustration {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+        .illustration img {
+            max-width: 100%;
+            height: auto;
+        }
+
+    .back-btn {
+        margin-top: 15px;
+        width: 100%;
+        padding: 10px;
+        background-color: #d3d3d3;
+        color: #333;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+        .back-btn:hover {
+            background-color: #bcbcbc;
+        }
+</style>
+<div class="register-container">
+    <div class="register-box">
+        <h2>Register</h2>
+        <form>
+            <div class="input-group">
+                <label for="first-name">First Name</label>
+                <input type="text" @bind="nayaUser.FirstName" id="first-name" name="first-name" required>
+            </div>
+            <div class="input-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" @bind="nayaUser.LastName" id="last-name" name="last-name" required>
+            </div>
+            <div class="input-group">
+                <label for="user-name">User Name</label>
+                <input type="text" @bind="nayaUser.UserName" id="user-name" name="user-name" required>
+            </div>
+            <div class="input-group">
+                <label for="currency">Currency</label>
+                <input type="text" id="currency" @bind="nayaUser.Currency" name="currency" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" @bind="nayaUser.Password" name="password" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" @bind="nayaUser.ConfirmPassword" name="confirm-password" required>
+            </div>
+            <button type="submit" @onclick="AddNewUser" class="register-btn">Register</button><br>
+            <br>
+            <a href="/" class="back-btn">Back</a>
+        </form>
+    </div>
+    <div class="illustration">
+        <img src="illustration.png" alt="Illustration">
+
+    </div>
+</div>
+@if (errorMessage != null)
+{
+    <p class="error-message">@errorMessage</p>
+}
+
+
+
+
+@code {
+    private User nayaUser = new User(); //obj created for User Class
+    private string errorMessage;
+
+    // New field for searching user
+    private string searchUserName;
+
+    // Field to hold retrieved user information
+    private User retrievedUser;
+
+    private async Task AddNewUser()
+    {
+        try
+        {
+            var existingUsers = await userService.LoadUsersAsync();
+
+
+            await userService.SaveUserAsync(nayaUser);
+
+            nayaUser = new User();
+            errorMessage = null;
+            navigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while adding the user: {ex.Message}";
+            Console.WriteLine(errorMessage);
+        }
+    }
+
+    private async Task GetUserInfo()
+    {
+        try
+        {
+            var users = await userService.LoadUsersAsync();
+            retrievedUser = users.FirstOrDefault(u => u.UserName == searchUserName);
+
+            if (retrievedUser == null)
+            {
+                errorMessage = "No user found with this ID.";
+            }
+            else
+            {
+                errorMessage = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred while retrieving the user: {ex.Message}";
+            Console.WriteLine(errorMessage); // Log for debugging
+        }
+    }
+}

@@ -1,0 +1,143 @@
+﻿@page "/debt"
+@inject ExpenseTracker.Services.TransactionService TransactionService
+
+@using ExpenseTracker.Models 
+
+<div class="w-11/12 max-w-2xl bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-center text-2xl font-bold mb-6">Debt</h1>
+
+    <!-- Form Section -->
+    <form class="grid gap-4 mb-6" @onsubmit="HandleSubmit">
+        <div>
+            <label for="date" class="block font-bold mb-2">Date:</label>
+            <input type="date" id="date" name="date" @bind="DebtTransaction.Date" class="w-full p-2 border border-gray-300 rounded-md">
+        </div>
+
+        <div>
+            <label for="title" class="block font-bold mb-2">Title:</label>
+            <input type="text" id="title" name="title" placeholder="Enter title" @bind="DebtTransaction.Title" class="w-full p-2 border border-gray-300 rounded-md">
+        </div>
+
+        <div>
+            <label for="amount" class="block font-bold mb-2">Amount:</label>
+            <input type="number" id="amount" name="amount" placeholder="Enter amount" @bind="DebtTransaction.Amount" class="w-full p-2 border border-gray-300 rounded-md">
+        </div>
+
+        <div>
+            <label for="Source" class="block font-bold mb-2">Source:</label>
+            <textarea id="Source" name="Source" placeholder="Enter Source" @bind="DebtTransaction.Source" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 transition-colors">
+            Submit
+        </button>
+    </form>
+
+    <!-- Table Section -->
+    <div class="overflow-x-auto">
+        <table class="w-full border-collapse border border-gray-200">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 p-2 text-left">Date</th>
+                    <th class="border border-gray-300 p-2 text-left">Title</th>
+                    <th class="border border-gray-300 p-2 text-left">Amount</th>
+                    <th class="border border-gray-300 p-2 text-left">Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var debt in TransactionService.GetAllDebts())
+                {
+                    <tr>
+                        <td class="border border-gray-300 p-2">@debt.Date.ToShortDateString()</td>
+                        <td class="border border-gray-300 p-2">@debt.Title</td>
+                        <td class="border border-gray-300 p-2">@debt.Amount</td>
+                        <td class="border border-gray-300 p-2">@debt.Source</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+    /* General Styles */
+    body {
+        background-color: #f9fafb;
+        color: #4a4a4a;
+        font-family: Arial, sans-serif;
+    }
+
+    h1, h2 {
+        text-align: center;
+    }
+
+    /* Form Styles */
+    form {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    input, textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+        input:focus, textarea:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+
+    button {
+        background-color: #2563eb;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        button:hover {
+            background-color: #1e40af;
+        }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f3f4f6;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9fafb;
+    }
+
+    tr:hover {
+        background-color: #eef2ff;
+    }
+</style>
+@code {
+    private ExpenseTracker.Models.Debt DebtTransaction = new ExpenseTracker.Models.Debt(); // Explicitly refer to the Debt model from the Models namespace
+
+    private void HandleSubmit()
+    {
+        TransactionService.AddDebt(DebtTransaction); // Add Debt transaction
+        DebtTransaction = new ExpenseTracker.Models.Debt(); // Reset the form
+        StateHasChanged(); // Refresh the view
+    }
+}

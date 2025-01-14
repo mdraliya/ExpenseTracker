@@ -1,0 +1,161 @@
+﻿@page "/login"
+@using ExpenseTracker.Components.Layout
+@using ExpenseTracker.Models
+@using ExpenseTracker.Services
+@inject IUserService userService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateService authStateService
+
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f8f8e6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-container {
+        display: flex;
+        background-color: #fffff7;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 70%;
+        max-width: 800px;
+        overflow: hidden;
+    }
+
+    .login-box {
+        padding: 20px;
+        flex: 1;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #3c82b3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+        .login-btn:hover {
+            background-color: #306f94;
+        }
+
+    .create-account {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+        color: #3c82b3;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .create-account:hover {
+            text-decoration: underline;
+        }
+
+    .illustration {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+        .illustration img {
+            max-width: 100%;
+            height: auto;
+        }
+</style>
+
+<div class="login-container">
+    <div class="login-box">
+        <h2 align="center">Login</h2>
+        <form>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" @bind="username" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" @bind="password" id="password" name="password" required>
+            </div>
+            <button type="submit" @onclick="LoginUser" class="login-btn">Login</button>
+        </form>
+        <a href="/add-user" class="create-account">Create Account</a>
+    </div>
+    <div class="illustration">
+        <img src="illustration.png" alt="Illustration">
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+
+{
+    <p class="error-message">@errorMessage</p>
+}
+
+@code {
+    private string username;
+    private string password;
+
+    private string errorMessage;
+    private async Task LoginUser()
+    {
+        errorMessage = null; // Reset error message
+        try
+        {
+            var users = await userService.LoadUsersAsync();
+            var user = users.FirstOrDefault(u => u.UserName == username && u.Password == password); // Plain text comparison
+            if (user == null)
+            {
+                errorMessage = "Invalid username or password.";
+                return;
+            }
+
+
+            // Set authenticated user and store it in the JSON file
+            authStateService.SetAuthenticatedUser(user);
+            // Navigate to the dashboard
+            navigationManager.NavigateTo("/cash-in");
+
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred during login: {ex.Message}";
+            Console.WriteLine($"Login error: {ex.Message}");
+        }
+    }
+}
