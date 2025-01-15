@@ -4,6 +4,10 @@
 
 <div class="w-11/12 max-w-3xl bg-white p-5 rounded-lg shadow-md">
     <h1 class="text-center text-2xl font-bold mb-5">Cash Outflow</h1>
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="text-red-500 text-center mb-4">@ErrorMessage</div>
+    }
     <form class="grid gap-4 mb-5" @onsubmit="HandleSubmit">
         <div>
             <label for="date" class="font-bold">Date:</label>
@@ -54,13 +58,13 @@
             <tbody>
                 @foreach (var transaction in TransactionService.GetAllCashOutflows().OfType<CashOutflow>())
                 {
-                        <tr>
-                            <td class="p-3 border border-gray-300">@transaction.Date.ToShortDateString()</td>
-                            <td class="p-3 border border-gray-300">@transaction.Title</td>
-                            <td class="p-3 border border-gray-300">@transaction.Amount</td>
-                            <td class="p-3 border border-gray-300">@transaction.Description</td>
-                            <td class="p-3 border border-gray-300">@transaction.Category</td>
-                        </tr>
+                    <tr>
+                        <td class="p-3 border border-gray-300">@transaction.Date.ToShortDateString()</td>
+                        <td class="p-3 border border-gray-300">@transaction.Title</td>
+                        <td class="p-3 border border-gray-300">@transaction.Amount</td>
+                        <td class="p-3 border border-gray-300">@transaction.Description</td>
+                        <td class="p-3 border border-gray-300">@transaction.Category</td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -95,10 +99,10 @@
         transition: border-color 0.3s ease-in-out;
     }
 
-    input:focus, textarea:focus {
-        border-color: #2563eb;
-        outline: none;
-    }
+        input:focus, textarea:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
 
     button {
         background-color: #2563eb;
@@ -111,9 +115,9 @@
         transition: background-color 0.3s ease-in-out;
     }
 
-    button:hover {
-        background-color: #1e40af;
-    }
+        button:hover {
+            background-color: #1e40af;
+        }
 
     /* Table Styles */
     table {
@@ -147,18 +151,16 @@
 
     private void HandleSubmit()
     {
-        if (TransactionService.CurrentBalance >= Transaction.Amount)
+        try
         {
             TransactionService.AddCashOutflow(Transaction);
             Transaction = new CashOutflow(); // Reset the form
             ErrorMessage = null;
         }
-        else
+        catch (InvalidOperationException ex)
         {
-            ErrorMessage = "Insufficient balance for this transaction.";
+            ErrorMessage = ex.Message;
         }
         StateHasChanged(); // Refresh the view
     }
-
-
 }

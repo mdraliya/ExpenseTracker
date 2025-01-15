@@ -50,13 +50,21 @@ namespace ExpenseTracker.Services
             NotifyStateChanged();
         }
 
-        // Add CashOutflow transaction
+        /// Add CashOutflow transaction
         public void AddCashOutflow(CashOutflow transaction)
         {
-            _cashOutflows.Add(transaction);
-            SaveData(CashOutflowFilePath, _cashOutflows);
-            NotifyStateChanged();
+            if (CurrentBalance >= transaction.Amount)
+            {
+                _cashOutflows.Add(transaction);
+                SaveData(CashOutflowFilePath, _cashOutflows);
+                NotifyStateChanged();
+            }
+            else
+            {
+                throw new InvalidOperationException("Insufficient balance for this transaction.");
+            }
         }
+
 
         // Add Debt transaction
         public void AddDebt(Debt transaction)
