@@ -2,6 +2,7 @@
 @using ExpenseTracker.Components.Layout
 @using ExpenseTracker.Models
 @using ExpenseTracker.Services
+@layout NoNavLayout
 @inject IUserService userService
 @inject NavigationManager navigationManager
 
@@ -96,9 +97,17 @@
         cursor: pointer;
     }
 
-        .back-btn:hover {
+       .back-btn:hover {
             background-color: #bcbcbc;
+
         }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px;
+        display: block; /* Ensure it's displayed */
+    }
 </style>
 <div class="register-container">
     <div class="register-box">
@@ -162,12 +171,18 @@
         {
             var existingUsers = await userService.LoadUsersAsync();
 
+            if (existingUsers.Any(u => u.UserName == nayaUser.UserName))
+            {
+                errorMessage = "The username is already taken. Please choose a different username.";
+                
+                return; 
+            }
 
             await userService.SaveUserAsync(nayaUser);
 
             nayaUser = new User();
             errorMessage = null;
-            navigationManager.NavigateTo("/login");
+            navigationManager.NavigateTo("/");
         }
         catch (Exception ex)
         {

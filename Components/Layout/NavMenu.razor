@@ -4,10 +4,11 @@
 
     <!-- Navigation Links -->
     <nav class="nav-links">
-        <a href="/d" class="nav-link">Dashboard</a>
-        <a href="/c" class="nav-link active">Cash Inflow</a>
-        <a href="/cash-out" class="nav-link">Cash Outflow</a>
-        <a href="/debt" class="nav-link">Debt</a>
+        <NavLink href="/dashboard" class="nav-link" Match="NavLinkMatch.All">Dashboard</NavLink>
+        <NavLink href="/cash-in" class="nav-link" Match="NavLinkMatch.All">Cash Inflow</NavLink>
+        <NavLink href="/cash-out" class="nav-link" Match="NavLinkMatch.All">Cash Outflow</NavLink>
+        <NavLink href="/debt" class="nav-link" Match="NavLinkMatch.All">Debt</NavLink>
+        <NavLink href="/" class="nav-link" Match="NavLinkMatch.All">Logout</NavLink>
     </nav>
 </div>
 

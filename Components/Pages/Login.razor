@@ -1,7 +1,8 @@
-﻿@page "/login"
+﻿@page "/"
 @using ExpenseTracker.Components.Layout
 @using ExpenseTracker.Models
 @using ExpenseTracker.Services
+@layout NoNavLayout
 @inject IUserService userService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateService authStateService
@@ -68,9 +69,9 @@
         cursor: pointer;
     }
 
-        .login-btn:hover {
-            background-color: #306f94;
-        }
+    .login-btn:hover {
+        background-color: #306f94;
+    }
 
     .create-account {
         display: block;
@@ -81,9 +82,9 @@
         font-size: 14px;
     }
 
-        .create-account:hover {
-            text-decoration: underline;
-        }
+    .create-account:hover {
+        text-decoration: underline;
+    }
 
     .illustration {
         flex: 1;
@@ -93,10 +94,10 @@
         padding: 20px;
     }
 
-        .illustration img {
-            max-width: 100%;
-            height: auto;
-        }
+    .illustration img {
+        max-width: 100%;
+        height: auto;
+    }
 </style>
 
 <div class="login-container">
@@ -111,7 +112,7 @@
                 <label for="password">Password</label>
                 <input type="password" @bind="password" id="password" name="password" required>
             </div>
-            <button type="submit" @onclick="LoginUser" class="login-btn">Login</button>
+            <button type="button" @onclick="LoginUser" class="login-btn">Login</button>
         </form>
         <a href="/add-user" class="create-account">Create Account</a>
     </div>
@@ -121,9 +122,8 @@
 </div>
 
 @if (!string.IsNullOrEmpty(errorMessage))
-
 {
-    <p class="error-message">@errorMessage</p>
+        <p class="error-message" style="color: red;">@errorMessage</p>
 }
 
 @code {
@@ -131,6 +131,7 @@
     private string password;
 
     private string errorMessage;
+
     private async Task LoginUser()
     {
         errorMessage = null; // Reset error message
@@ -144,13 +145,9 @@
                 return;
             }
 
-
-            // Set authenticated user and store it in the JSON file
+            // Set authenticated user and navigate to dashboard
             authStateService.SetAuthenticatedUser(user);
-            // Navigate to the dashboard
-            navigationManager.NavigateTo("/cash-in");
-
-
+            navigationManager.NavigateTo("/dashboard");
         }
         catch (Exception ex)
         {

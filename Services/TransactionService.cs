@@ -7,10 +7,21 @@ namespace ExpenseTracker.Services
 {
     public class TransactionService
     {
+        private List<CashInflow> cashInflows = new();
+        private List<CashOutflow> cashOutflows = new();
+
+        public decimal CurrentBalance =>
+            cashInflows.Sum(inflow => inflow.Amount) - cashOutflows.Sum(outflow => outflow.Amount);
+
+
         private readonly List<CashInflow> _cashInflows = new();
         private readonly List<CashOutflow> _cashOutflows = new();
         private readonly List<Debt> _debts = new(); // List to store debts
 
+
+        public string Category { get; set; } = string.Empty;
+
+       
         // Event to notify UI of updates
         public event Action OnChange;
 
