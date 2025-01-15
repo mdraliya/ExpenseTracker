@@ -52,7 +52,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var transaction in TransactionService.GetAllTransactions().OfType<CashOutflow>())
+                @foreach (var transaction in TransactionService.GetAllCashOutflows().OfType<CashOutflow>())
                 {
                         <tr>
                             <td class="p-3 border border-gray-300">@transaction.Date.ToShortDateString()</td>
@@ -147,9 +147,17 @@
 
     private void HandleSubmit()
     {
-        TransactionService.AddCashOutflow(Transaction); // Add CashOutflow transaction
-        Transaction = new CashOutflow(); // Reset form after submitting
-        StateHasChanged(); // Force UI refresh
+        if (TransactionService.CurrentBalance >= Transaction.Amount)
+        {
+            TransactionService.AddCashOutflow(Transaction);
+            Transaction = new CashOutflow(); // Reset the form
+            ErrorMessage = null;
+        }
+        else
+        {
+            ErrorMessage = "Insufficient balance for this transaction.";
+        }
+        StateHasChanged(); // Refresh the view
     }
 
 
