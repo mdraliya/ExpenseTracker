@@ -52,6 +52,7 @@ namespace ExpenseTracker.Services
             NotifyStateChanged();
         }
 
+
         /// Add CashOutflow transaction
         public void AddCashOutflow(CashOutflow transaction)
         {
@@ -99,6 +100,18 @@ namespace ExpenseTracker.Services
             NotifyStateChanged();
         }
 
+        //Cleared Debt 
+        public void MarkDebtAsCleared(int debtId)
+{
+    var debtToUpdate = _debts.FirstOrDefault(d => d.Id == debtId); // Find the debt by its ID
+    if (debtToUpdate != null && !debtToUpdate.IsCleared) // Ensure the debt is not already cleared
+    {
+        debtToUpdate.IsCleared = true; // Mark the debt as cleared
+        SaveData(DebtFilePath, _debts); // Save the updated list back to the JSON file
+        NotifyStateChanged(); // Notify that the state has changed
+    }
+}
+
         // Get all transactions (CashInflow, CashOutflow, and Debt combined)
         public List<object> GetAllTransactions()
         {
@@ -126,6 +139,17 @@ namespace ExpenseTracker.Services
 
         // Get Total Debt
         public decimal GetTotalDebt() => _debts.Sum(d => d.Amount);
+
+        public decimal GetClearedDebt()
+        {
+            return _debts.Where(d => d.IsCleared).Sum(d => d.Amount);
+        }
+
+        public decimal GetRemainingDebt()
+        {
+            return _debts.Where(d => !d.IsCleared).Sum(d => d.Amount);
+        }
+
 
         // Get Available Balance (Cash Inflow - Cash Outflow + Debt)
         public decimal GetAvailableBalance() =>

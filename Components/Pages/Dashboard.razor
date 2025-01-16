@@ -29,6 +29,17 @@
             </div>
         </div>
 
+        <div class="flex justify-between mb-6">
+            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
+                <h2 class="text-lg font-semibold mb-2">Cleared Debt</h2>
+                <p class="text-2xl font-bold">@TransactionService.GetClearedDebt()</p>
+            </div>
+            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
+                <h2 class="text-lg font-semibold mb-2">Remaining Debt</h2>
+                <p class="text-2xl font-bold">@TransactionService.GetRemainingDebt()</p>
+            </div>
+        </div>
+
         <h3 class="text-lg font-semibold mb-4">Top 5 Transactions</h3>
         <table class="w-full border-collapse border border-gray-300">
             <thead>
@@ -36,6 +47,7 @@
                     <th class="p-3 border border-gray-300 bg-gray-200">Date</th>
                     <th class="p-3 border border-gray-300 bg-gray-200">Title</th>
                     <th class="p-3 border border-gray-300 bg-gray-200">Amount</th>
+                    <th class="p-3 border border-gray-300 bg-gray-200">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,6 +57,7 @@
                         <td class="p-3 border border-gray-300">@cashInflow.Date.ToShortDateString()</td>
                         <td class="p-3 border border-gray-300">@cashInflow.Title</td>
                         <td class="p-3 border border-gray-300">@cashInflow.Amount</td>
+                        <td class="p-3 border border-gray-300"></td> <!-- No action needed for Cash Inflows -->
                     </tr>
                 }
                 @foreach (var cashOutflow in TransactionService.GetAllCashOutflows().Take(5))
@@ -53,6 +66,7 @@
                         <td class="p-3 border border-gray-300">@cashOutflow.Date.ToShortDateString()</td>
                         <td class="p-3 border border-gray-300">@cashOutflow.Title</td>
                         <td class="p-3 border border-gray-300">@cashOutflow.Amount</td>
+                        <td class="p-3 border border-gray-300"></td> <!-- No action needed for Cash Outflows -->
                     </tr>
                 }
                 @foreach (var debt in TransactionService.GetAllDebts().Take(5))
@@ -61,6 +75,16 @@
                         <td class="p-3 border border-gray-300">@debt.Date.ToShortDateString()</td>
                         <td class="p-3 border border-gray-300">@debt.Title</td>
                         <td class="p-3 border border-gray-300">@debt.Amount</td>
+                        <td class="p-3 border border-gray-300">
+                            @if (!debt.IsCleared)
+                            {
+                                <button @onclick="() => MarkDebtAsCleared(debt.Id)" class="bg-green-500 text-white p-2 rounded">Mark as Cleared</button>
+                            }
+                            else
+                            {
+                                <span class="text-green-500">Cleared</span>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -77,5 +101,10 @@
         {
             navigationManager.NavigateTo("/"); // Redirect to login if not authenticated
         }
+    }
+
+    private void MarkDebtAsCleared(int debtId)
+    {
+        TransactionService.MarkDebtAsCleared(debtId);
     }
 }
