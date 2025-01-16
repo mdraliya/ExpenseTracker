@@ -104,6 +104,8 @@ namespace ExpenseTracker.Services
         // Get Available Balance (Cash Inflow - Cash Outflow + Debt)
         public decimal GetAvailableBalance() => GetTotalCashInflow() - GetTotalCashOutflow() + GetTotalDebt();
 
+
+
         // Get totals
         public decimal GetTotalCashInflow() => _cashInflows.Sum(t => t.Amount);
         public decimal GetTotalCashOutflow() => _cashOutflows.Sum(t => t.Amount);

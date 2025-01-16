@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using ExpenseTracker.Services;
+using MudBlazor.Services;
 
 namespace ExpenseTracker
 {
@@ -23,6 +24,7 @@ namespace ExpenseTracker
             builder.Services.AddSingleton<AuthenticationStateService>();
             builder.Services.AddSingleton<TransactionService>(); // Add the TransactionService
             builder.Services.AddScoped<TransactionService>();
+            builder.Services.AddMudServices();
 
 
 
