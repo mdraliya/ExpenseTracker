@@ -16,9 +16,9 @@ namespace ExpenseTracker.Services
         private const string CashOutflowFileName = "CashOutflows.json";
         private const string DebtFileName = "Debts.json";
 
-        private readonly string CashInflowFilePath = Path.Combine(BaseDirectory, CashInflowFileName);
-        private readonly string CashOutflowFilePath = Path.Combine(BaseDirectory, CashOutflowFileName);
-        private readonly string DebtFilePath = Path.Combine(BaseDirectory, DebtFileName);
+        private readonly string CashInflowFilePath = Path.Combine(AppContext.BaseDirectory, "CashInflow.json");
+        private readonly string CashOutflowFilePath = Path.Combine(AppContext.BaseDirectory, "CashOutflow.json");
+        private readonly string DebtFilePath = Path.Combine(AppContext.BaseDirectory, "Debt.json");
 
         private readonly List<CashInflow> _cashInflows;
         private readonly List<CashOutflow> _cashOutflows;
@@ -117,11 +117,11 @@ namespace ExpenseTracker.Services
         }
 
         // Load data from JSON file
-        private List<T> LoadData<T>(string filePath)
+        private List<User> LoadData<User>(string filePath)
         {
             if (!File.Exists(filePath)) return null;
             var json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<T>>(json);
+            return JsonSerializer.Deserialize<List<User>>(json);
         }
     }
 }

@@ -2,54 +2,86 @@
 @inject ExpenseTracker.Services.TransactionService TransactionService
 @using ExpenseTracker.Models
 
+<div class="w-11/12 max-w-3xl bg-white p-5 rounded-lg shadow-md">
+    <h1 class="text-center text-2xl font-bold mb-5">Cash Inflow</h1>
+    <form class="space-y-4 mb-5" @onsubmit="HandleSubmit">
+        <div>
+            <label for="date" class="block text-sm font-medium text-gray-700">Date:</label>
+            <input type="date" id="date" @bind="Transaction.Date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+        </div>
 
-<h1 class="text-center text-2xl font-bold mb-5">Cash Inflow</h1>
+        <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">Title:</label>
+            <input type="text" id="title" @bind="Transaction.Title" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+        </div>
 
-<form class="space-y-4 mb-5" @onsubmit="HandleSubmit">
-    <div>
-        <label for="date" class="block text-sm font-medium text-gray-700">Date:</label>
-        <input type="date" id="date" @bind="Transaction.Date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+        <div>
+            <label for="amount" class="block text-sm font-medium text-gray-700">Amount:</label>
+            <input type="number" id="amount" @bind="Transaction.Amount" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+        </div>
+
+        <div>
+            <label for="description" class="block text-sm font-medium text-gray-700">Description:</label>
+            <textarea id="description" @bind="Transaction.Description" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+        </div>
+
+        <div>
+            <label for="category" class="block text-sm font-medium text-gray-700">Category:</label>
+            <select id="category" @bind="Transaction.Category" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <option value="Salary">Salary</option>
+                <option value="House Rent">House Rent</option>
+                <option value="Interest">Interest</option>
+                <option value="Funding">Funding</option>
+                <option value="Taking out loan">Taking out loan</option>
+                <option value="Revenue">Revenue</option>
+            </select>
+        </div>
+
+        <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Submit</button>
+    </form>
+
+    @if (!string.IsNullOrEmpty(FeedbackMessage))
+    {
+        <div class="text-center p-2 text-green-700 bg-green-200 rounded mb-4">@FeedbackMessage</div>
+    }
+</div>
+
+<div class="w-11/12 max-w-3xl bg-white p-5 rounded-lg shadow-md mt-6">
+    <h2 class="text-xl font-bold mb-5">Filter Transactions</h2>
+    <div class="space-y-4">
+        <div>
+            <label for="type" class="block text-sm font-medium text-gray-700">Category:</label>
+            <select id="type" @bind="FilterCategory" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                <option value="">All</option>
+                <option value="Salary">Salary</option>
+                <option value="House Rent">House Rent</option>
+                <option value="Interest">Interest</option>
+                <option value="Funding">Funding</option>
+                <option value="Taking out loan">Taking out loan</option>
+                <option value="Revenue">Revenue</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">Title:</label>
+            <input type="text" id="title" @bind="FilterTitle" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter title to search">
+        </div>
+
+        <div>
+            <label for="dateRangeStart" class="block text-sm font-medium text-gray-700">Start Date:</label>
+            <input type="date" id="dateRangeStart" @bind="FilterStartDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+
+        <div>
+            <label for="dateRangeEnd" class="block text-sm font-medium text-gray-700">End Date:</label>
+            <input type="date" id="dateRangeEnd" @bind="FilterEndDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+        </div>
+
+        <button type="button" @onclick="FilterTransactions" class="w-full py-2 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700">Apply Filters</button>
     </div>
+</div>
 
-    <div>
-        <label for="title" class="block text-sm font-medium text-gray-700">Title:</label>
-        <input type="text" id="title" @bind="Transaction.Title" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-    </div>
-
-    <div>
-        <label for="amount" class="block text-sm font-medium text-gray-700">Amount:</label>
-        <input type="number" id="amount" @bind="Transaction.Amount" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-    </div>
-
-    <div>
-        <label for="description" class="block text-sm font-medium text-gray-700">Description:</label>
-        <textarea id="description" @bind="Transaction.Description" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
-    </div>
-
-    <div class="mb-4">
-        <label for="category">Category</label>
-        <select id="category" @bind="Transaction.Category" class="ml-3">
-            <option value="Salary">Salary</option>
-            <option value="House Rent">House Rent</option>
-            <option value="Interest">Interest</option>
-            <option value="Funding">Funding</option>
-            <option value="Taking out loan">Taking out loan</option>
-            <option value="Revenue">Revenue</option>
-        </select>
-    </div>
-
-    <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Submit</button>
-</form>
-
-@if (!string.IsNullOrEmpty(FeedbackMessage))
-{
-    <div class="p-4 mt-2 text-green-800 bg-green-100 border border-green-300 rounded">
-        @FeedbackMessage
-    </div>
-}
-
-
-<div class="mt-5">
+<div class="w-11/12 max-w-3xl bg-white p-5 rounded-lg shadow-md mt-6">
     <h2 class="text-xl font-bold mb-2">Transactions:</h2>
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -63,23 +95,34 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @foreach (var transaction in TransactionService.GetAllCashInflows())
+                @foreach (var transaction in FilteredTransactions)
                 {
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Date.ToShortDateString()</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Title</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Amount</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Description</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Category</td>
-                        </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Date.ToShortDateString()</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Title</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Amount</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Description</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@transaction.Category</td>
+                    </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
 @code {
     private CashInflow Transaction = new();
     private string FeedbackMessage = string.Empty;
+    private List<CashInflow> FilteredTransactions = new();
+    private string FilterCategory = string.Empty;
+    private string FilterTitle = string.Empty;
+    private DateTime? FilterStartDate = null;
+    private DateTime? FilterEndDate = null;
+
+    protected override void OnInitialized()
+    {
+        FilteredTransactions = TransactionService.GetAllCashInflows().ToList();
+    }
 
     private async Task HandleSubmit()
     {
@@ -88,6 +131,7 @@
             TransactionService.AddCashInflow(Transaction); // Add transaction
             FeedbackMessage = "Transaction added successfully!"; // Set feedback
             Transaction = new CashInflow(); // Reset the form
+            FilteredTransactions = TransactionService.GetAllCashInflows().ToList(); // Refresh filtered transactions
         }
         catch (Exception ex)
         {
@@ -95,5 +139,14 @@
         }
         await InvokeAsync(StateHasChanged); // Refresh the view
     }
-}
 
+    private void FilterTransactions()
+    {
+        FilteredTransactions = TransactionService.GetAllCashInflows()
+            .Where(t => (string.IsNullOrEmpty(FilterCategory) || t.Category == FilterCategory) &&
+                        (string.IsNullOrEmpty(FilterTitle) || t.Title.Contains(FilterTitle, StringComparison.OrdinalIgnoreCase)) &&
+                        (!FilterStartDate.HasValue || t.Date >= FilterStartDate.Value) &&
+                        (!FilterEndDate.HasValue || t.Date <= FilterEndDate.Value))
+            .ToList();
+    }
+}
