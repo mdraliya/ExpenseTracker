@@ -6,8 +6,10 @@ using System.Linq;
 using System.Text.Json;
 
 namespace ExpenseTracker.Services
+
 {
     public class TransactionService
+
     {
         private static readonly string BaseDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ExpenseTracker");
@@ -64,6 +66,29 @@ namespace ExpenseTracker.Services
                 throw new InvalidOperationException("Insufficient balance for this transaction.");
             }
         }
+
+
+        // Delete a specific debt entry by its ID
+        public void DeleteDebt(int debtId)
+        {
+            var debtToDelete = _debts.FirstOrDefault(d => d.Id == debtId); // Assuming Debt model has an Id property
+            if (debtToDelete != null)
+            {
+                _debts.Remove(debtToDelete);
+                SaveData(DebtFilePath, _debts);
+                NotifyStateChanged();
+            }
+        }
+
+        // Update available balance
+        public void UpdateAvailableBalance(decimal debtAmount)
+        {
+            // Assuming debts are deducted from the available balance
+            var updatedBalance = CurrentBalance - debtAmount;
+            // Logic for persisting the updated balance can be added here if necessary
+            NotifyStateChanged();
+        }
+
 
 
         // Add Debt transaction

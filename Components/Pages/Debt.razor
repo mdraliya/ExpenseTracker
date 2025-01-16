@@ -1,7 +1,6 @@
 ﻿@page "/debt"
 @inject ExpenseTracker.Services.TransactionService TransactionService
-
-@using ExpenseTracker.Models 
+@using ExpenseTracker.Models
 
 <div class="w-11/12 max-w-2xl bg-white p-6 rounded-lg shadow-md">
     <h1 class="text-center text-2xl font-bold mb-6">Debt</h1>
@@ -24,8 +23,8 @@
         </div>
 
         <div>
-            <label for="Source" class="block font-bold mb-2">Source:</label>
-            <textarea id="Source" name="Source" placeholder="Enter Source" @bind="DebtTransaction.Source" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+            <label for="source" class="block font-bold mb-2">Source:</label>
+            <textarea id="source" name="source" placeholder="Enter Source" @bind="DebtTransaction.Source" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
         </div>
 
         <button type="submit" class="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 transition-colors">
@@ -42,6 +41,7 @@
                     <th class="border border-gray-300 p-2 text-left">Title</th>
                     <th class="border border-gray-300 p-2 text-left">Amount</th>
                     <th class="border border-gray-300 p-2 text-left">Source</th>
+                    <th class="border border-gray-300 p-2 text-left">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,92 +52,37 @@
                         <td class="border border-gray-300 p-2">@debt.Title</td>
                         <td class="border border-gray-300 p-2">@debt.Amount</td>
                         <td class="border border-gray-300 p-2">@debt.Source</td>
+                        <td class="border border-gray-300 p-2">
+                            <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition" @onclick="() => HandleDelete(debt.Id)">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
-<style>
-    /* General Styles */
-    body {
-        background-color: #f9fafb;
-        color: #4a4a4a;
-        font-family: Arial, sans-serif;
-    }
 
-    h1, h2 {
-        text-align: center;
-    }
-
-    /* Form Styles */
-    form {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    input, textarea {
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        padding: 8px;
-        font-size: 14px;
-        transition: border-color 0.3s ease-in-out;
-    }
-
-        input:focus, textarea:focus {
-            border-color: #2563eb;
-            outline: none;
-        }
-
-    button {
-        background-color: #2563eb;
-        color: white;
-        padding: 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s ease-in-out;
-    }
-
-        button:hover {
-            background-color: #1e40af;
-        }
-
-    /* Table Styles */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-
-    th, td {
-        padding: 10px;
-        border: 1px solid #d1d5db;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f3f4f6;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f9fafb;
-    }
-
-    tr:hover {
-        background-color: #eef2ff;
-    }
-</style>
 @code {
-    private ExpenseTracker.Models.Debt DebtTransaction = new ExpenseTracker.Models.Debt(); // Explicitly refer to the Debt model from the Models namespace
+    private ExpenseTracker.Models.Debt DebtTransaction = new ExpenseTracker.Models.Debt(); // Initialize new DebtTransaction
 
+    // Handle form submission
     private void HandleSubmit()
     {
-        TransactionService.AddDebt(DebtTransaction); // Add Debt transaction
+        TransactionService.AddDebt(DebtTransaction); // Add the debt to the service
         DebtTransaction = new ExpenseTracker.Models.Debt(); // Reset the form
         StateHasChanged(); // Refresh the view
+    }
+
+    // Handle debt deletion
+    private void HandleDelete(int debtId)
+    {
+        var debt = TransactionService.GetAllDebts().FirstOrDefault(d => d.Id == debtId);
+        if (debt != null)
+        {
+            TransactionService.DeleteDebt(debtId); // Delete the debt entry
+            TransactionService.UpdateAvailableBalance(debt.Amount); // Adjust the available balance
+        }
     }
 }
