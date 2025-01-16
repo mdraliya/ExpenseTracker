@@ -167,7 +167,9 @@
                   ChartSeries="@Series"
                   XAxisLabels="@XAxisLabels"
                   Width="100%"
-                  Height="100%">
+                  Height="350px"
+                  ChartOptions="@chartOptions"
+                  ChartPalette="@(new string[] { "#28a745", "#dc3545" })">
             <CustomGraphics>
                 <MudText Typo="Typo.h6" Align="Align.Center">Cash Flow Trends</MudText>
             </CustomGraphics>
@@ -275,10 +277,15 @@
 </div>
 
 @code {
+    private ChartOptions chartOptions = new ChartOptions
+        {
+            YAxisFormat = "C0",  // Currency format without decimals for cleaner display
+            YAxisLines = true,
+            XAxisLines = true
+        };
+
     private List<ChartSeries> Series = new List<ChartSeries>();
     private string[] XAxisLabels = Array.Empty<string>();
-
-    private readonly string[] _colors = { "#28a745", "#dc3545" };
 
     protected override async Task OnInitializedAsync()
     {
@@ -296,46 +303,58 @@
         TransactionService.OnChange += async () =>
         {
             await LoadChartDataAsync();
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         };
     }
-
     private async Task LoadChartDataAsync()
     {
         await Task.Run(() =>
         {
+            // Get the last 6 months of data
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddMonths(-5);  // Show last 6 months including current
+
+            var monthRange = Enumerable.Range(0, 6)
+                .Select(i => startDate.AddMonths(i))
+                .Select(d => new DateTime(d.Year, d.Month, 1))
+                .ToList();
+
             var cashInflows = TransactionService.GetAllCashInflows()
-                .OrderBy(t => t.Date)
+                .Where(t => t.Date >= startDate)
                 .GroupBy(t => new DateTime(t.Date.Year, t.Date.Month, 1))
                 .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
 
             var cashOutflows = TransactionService.GetAllCashOutflows()
-                .OrderBy(t => t.Date)
+                .Where(t => t.Date >= startDate)
                 .GroupBy(t => new DateTime(t.Date.Year, t.Date.Month, 1))
                 .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
 
-            var allMonths = cashInflows.Keys.Union(cashOutflows.Keys).OrderBy(date => date).ToList();
+            XAxisLabels = monthRange.Select(date => date.ToString("MMM yy")).ToArray();
 
-            XAxisLabels = allMonths.Select(date => date.ToString("MMM yyyy")).ToArray();
-
-            var inflowData = allMonths
+            var inflowData = monthRange
                 .Select(month => cashInflows.GetValueOrDefault(month, 0))
-                .Select(amount => (double)amount) // Convert decimal to double
+                .Select(amount => (double)amount)
                 .ToArray();
 
-            var outflowData = allMonths
+            var outflowData = monthRange
                 .Select(month => cashOutflows.GetValueOrDefault(month, 0))
-                .Select(amount => (double)amount) // Convert decimal to double
+                .Select(amount => (double)amount)
                 .ToArray();
 
             Series = new List<ChartSeries>
                 {
-            new ChartSeries { Name = "Cash Inflow", Data = inflowData },
-            new ChartSeries { Name = "Cash Outflow", Data = outflowData }
+            new ChartSeries
+            {
+                Name = "Cash Inflow",
+                Data = inflowData
+            },
+            new ChartSeries
+            {
+                Name = "Cash Outflow",
+                Data = outflowData
+            }
                 };
         });
-
-        StateHasChanged();
     }
 
 
