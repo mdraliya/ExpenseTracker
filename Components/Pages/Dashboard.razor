@@ -4,87 +4,168 @@
 @inject NavigationManager navigationManager
 @inject TransactionService TransactionService
 
-<div class="w-11/12 max-w-6xl mx-auto mt-5 bg-white rounded-lg shadow-lg p-6">
-    <header class="flex justify-between items-center mb-6">
-        <span class="text-lg font-semibold">User</span>
-        <div class="flex items-center">
-            <label for="balance" class="font-bold mr-2">Available balance:</label>
-            <input type="text" id="balance" value="@(TransactionService.GetAvailableBalance())" readonly class="border-none bg-gray-100 p-2 rounded-md text-sm w-24">
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    header span {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    header .balance {
+      display: flex;
+      align-items: center;
+    }
+
+    header .balance label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    header .balance input {
+      border: none;
+      background-color: #f0f0f0;
+      padding: 5px 10px;
+      border-radius: 5px;
+      width: 80px;
+      text-align: right;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: #f0f0f0;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin: 0 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h2 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    .stat-card p {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table th,
+    table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    table th {
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+</style>
+
+<div class="container">
+    <header>
+        <span>User</span>
+        <div class="balance">
+            <label for="balance">Available balance:</label>
+            <input type="text" id="balance" value="@(TransactionService.GetAvailableBalance())" readonly>
         </div>
     </header>
 
     <main>
-        <div class="flex justify-between mb-6">
-            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
-                <h2 class="text-lg font-semibold mb-2">Cash In Flow</h2>
-                <p class="text-2xl font-bold">@TransactionService.GetTotalCashInflow()</p>
+        <div class="stats">
+            <div class="stat-card">
+                <h2>Cash In Flow</h2>
+                <p>@TransactionService.GetTotalCashInflow()</p>
             </div>
-            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
-                <h2 class="text-lg font-semibold mb-2">Cash Out Flow</h2>
-                <p class="text-2xl font-bold">@TransactionService.GetTotalCashOutflow()</p>
+            <div class="stat-card">
+                <h2>Cash Out Flow</h2>
+                <p>@TransactionService.GetTotalCashOutflow()</p>
             </div>
-            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
-                <h2 class="text-lg font-semibold mb-2">Debt</h2>
-                <p class="text-2xl font-bold">@TransactionService.GetTotalDebt()</p>
-            </div>
-        </div>
-
-        <div class="flex justify-between mb-6">
-            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
-                <h2 class="text-lg font-semibold mb-2">Cleared Debt</h2>
-                <p class="text-2xl font-bold">@TransactionService.GetClearedDebt()</p>
-            </div>
-            <div class="flex-1 bg-gray-100 p-6 text-center rounded-lg shadow-md mx-2">
-                <h2 class="text-lg font-semibold mb-2">Remaining Debt</h2>
-                <p class="text-2xl font-bold">@TransactionService.GetRemainingDebt()</p>
+            <div class="stat-card">
+                <h2>Debt</h2>
+                <p>@TransactionService.GetTotalDebt()</p>
             </div>
         </div>
 
-        <h3 class="text-lg font-semibold mb-4">Top 5 Transactions</h3>
-        <table class="w-full border-collapse border border-gray-300">
+        <div class="stats">
+            <div class="stat-card">
+                <h2>Cleared Debt</h2>
+                <p>@TransactionService.GetClearedDebt()</p>
+            </div>
+            <div class="stat-card">
+                <h2>Remaining Debt</h2>
+                <p>@TransactionService.GetRemainingDebt()</p>
+            </div>
+        </div>
+
+        <h3>Top 5 Transactions</h3>
+        <table>
             <thead>
                 <tr>
-                    <th class="p-3 border border-gray-300 bg-gray-200">Date</th>
-                    <th class="p-3 border border-gray-300 bg-gray-200">Title</th>
-                    <th class="p-3 border border-gray-300 bg-gray-200">Amount</th>
-                    <th class="p-3 border border-gray-300 bg-gray-200">Action</th>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Amount</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var cashInflow in TransactionService.GetAllCashInflows().Take(5))
                 {
                     <tr>
-                        <td class="p-3 border border-gray-300">@cashInflow.Date.ToShortDateString()</td>
-                        <td class="p-3 border border-gray-300">@cashInflow.Title</td>
-                        <td class="p-3 border border-gray-300">@cashInflow.Amount</td>
-                        <td class="p-3 border border-gray-300"></td> <!-- No action needed for Cash Inflows -->
+                        <td>@cashInflow.Date.ToShortDateString()</td>
+                        <td>@cashInflow.Title</td>
+                        <td>@cashInflow.Amount</td>
                     </tr>
                 }
                 @foreach (var cashOutflow in TransactionService.GetAllCashOutflows().Take(5))
                 {
                     <tr>
-                        <td class="p-3 border border-gray-300">@cashOutflow.Date.ToShortDateString()</td>
-                        <td class="p-3 border border-gray-300">@cashOutflow.Title</td>
-                        <td class="p-3 border border-gray-300">@cashOutflow.Amount</td>
-                        <td class="p-3 border border-gray-300"></td> <!-- No action needed for Cash Outflows -->
+                        <td>@cashOutflow.Date.ToShortDateString()</td>
+                        <td>@cashOutflow.Title</td>
+                        <td>@cashOutflow.Amount</td>
                     </tr>
                 }
                 @foreach (var debt in TransactionService.GetAllDebts().Take(5))
                 {
                     <tr>
-                        <td class="p-3 border border-gray-300">@debt.Date.ToShortDateString()</td>
-                        <td class="p-3 border border-gray-300">@debt.Title</td>
-                        <td class="p-3 border border-gray-300">@debt.Amount</td>
-                        <td class="p-3 border border-gray-300">
-                            @if (!debt.IsCleared)
-                            {
-                                <button @onclick="() => MarkDebtAsCleared(debt.Id)" class="bg-green-500 text-white p-2 rounded">Mark as Cleared</button>
-                            }
-                            else
-                            {
-                                <span class="text-green-500">Cleared</span>
-                            }
-                        </td>
+                        <td>@debt.Date.ToShortDateString()</td>
+                        <td>@debt.Title</td>
+                        <td>@debt.Amount</td>
                     </tr>
                 }
             </tbody>
@@ -101,10 +182,5 @@
         {
             navigationManager.NavigateTo("/"); // Redirect to login if not authenticated
         }
-    }
-
-    private void MarkDebtAsCleared(int debtId)
-    {
-        TransactionService.MarkDebtAsCleared(debtId);
     }
 }

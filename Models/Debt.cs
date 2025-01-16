@@ -8,5 +8,6 @@
         public decimal Amount { get; set; }
         public string Source { get; set; }
         public bool IsCleared { get; set; }
+        public string Type { get; set; }
     }
 }

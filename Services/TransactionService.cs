@@ -6,21 +6,15 @@ using System.Linq;
 using System.Text.Json;
 
 namespace ExpenseTracker.Services
-
 {
     public class TransactionService
-
     {
         private static readonly string BaseDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ExpenseTracker");
 
-        private const string CashInflowFileName = "CashInflows.json";
-        private const string CashOutflowFileName = "CashOutflows.json";
-        private const string DebtFileName = "Debts.json";
-
-        private readonly string CashInflowFilePath = Path.Combine(AppContext.BaseDirectory, "CashInflow.json");
-        private readonly string CashOutflowFilePath = Path.Combine(AppContext.BaseDirectory, "CashOutflow.json");
-        private readonly string DebtFilePath = Path.Combine(AppContext.BaseDirectory, "Debt.json");
+        private readonly string CashInflowFilePath = Path.Combine(BaseDirectory, "CashInflows.json");
+        private readonly string CashOutflowFilePath = Path.Combine(BaseDirectory, "CashOutflows.json");
+        private readonly string DebtFilePath = Path.Combine(BaseDirectory, "Debts.json");
 
         private readonly List<CashInflow> _cashInflows;
         private readonly List<CashOutflow> _cashOutflows;
@@ -37,14 +31,21 @@ namespace ExpenseTracker.Services
             _debts = LoadData<Debt>(DebtFilePath) ?? new List<Debt>();
         }
 
-        public string Category { get; set; } = string.Empty;
-
         public event Action OnChange;
 
-        public decimal CurrentBalance =>
-            GetTotalCashInflow() - GetTotalCashOutflow();
+        public decimal CurrentBalance => GetTotalCashInflow() - GetTotalCashOutflow();
 
-        // Add CashInflow transaction
+        // Fetch Top 5 Highest and Lowest Transactions
+        public List<CashInflow> GetTop5HighestCashInflows() => _cashInflows.OrderByDescending(t => t.Amount).Take(5).ToList();
+        public List<CashInflow> GetTop5LowestCashInflows() => _cashInflows.OrderBy(t => t.Amount).Take(5).ToList();
+
+        public List<CashOutflow> GetTop5HighestCashOutflows() => _cashOutflows.OrderByDescending(t => t.Amount).Take(5).ToList();
+        public List<CashOutflow> GetTop5LowestCashOutflows() => _cashOutflows.OrderBy(t => t.Amount).Take(5).ToList();
+
+        public List<Debt> GetTop5HighestDebts() => _debts.OrderByDescending(d => d.Amount).Take(5).ToList();
+        public List<Debt> GetTop5LowestDebts() => _debts.OrderBy(d => d.Amount).Take(5).ToList();
+
+        // Add methods for Cash Inflow, Outflow, and Debt
         public void AddCashInflow(CashInflow transaction)
         {
             _cashInflows.Add(transaction);
@@ -52,8 +53,6 @@ namespace ExpenseTracker.Services
             NotifyStateChanged();
         }
 
-
-        /// Add CashOutflow transaction
         public void AddCashOutflow(CashOutflow transaction)
         {
             if (CurrentBalance >= transaction.Amount)
@@ -68,11 +67,27 @@ namespace ExpenseTracker.Services
             }
         }
 
+        public void AddDebt(Debt transaction)
+        {
+            _debts.Add(transaction);
+            SaveData(DebtFilePath, _debts);
+            NotifyStateChanged();
+        }
 
-        // Delete a specific debt entry by its ID
+        public void MarkDebtAsCleared(int debtId)
+        {
+            var debtToUpdate = _debts.FirstOrDefault(d => d.Id == debtId);
+            if (debtToUpdate != null && !debtToUpdate.IsCleared)
+            {
+                debtToUpdate.IsCleared = true;
+                SaveData(DebtFilePath, _debts);
+                NotifyStateChanged();
+            }
+        }
+
         public void DeleteDebt(int debtId)
         {
-            var debtToDelete = _debts.FirstOrDefault(d => d.Id == debtId); // Assuming Debt model has an Id property
+            var debtToDelete = _debts.FirstOrDefault(d => d.Id == debtId);
             if (debtToDelete != null)
             {
                 _debts.Remove(debtToDelete);
@@ -81,81 +96,29 @@ namespace ExpenseTracker.Services
             }
         }
 
-        // Update available balance
-        public void UpdateAvailableBalance(decimal debtAmount)
-        {
-            // Assuming debts are deducted from the available balance
-            var updatedBalance = CurrentBalance - debtAmount;
-            // Logic for persisting the updated balance can be added here if necessary
-            NotifyStateChanged();
-        }
-
-
-
-        // Add Debt transaction
-        public void AddDebt(Debt transaction)
-        {
-            _debts.Add(transaction);
-            SaveData(DebtFilePath, _debts);
-            NotifyStateChanged();
-        }
-
-        //Cleared Debt 
-        public void MarkDebtAsCleared(int debtId)
-{
-    var debtToUpdate = _debts.FirstOrDefault(d => d.Id == debtId); // Find the debt by its ID
-    if (debtToUpdate != null && !debtToUpdate.IsCleared) // Ensure the debt is not already cleared
-    {
-        debtToUpdate.IsCleared = true; // Mark the debt as cleared
-        SaveData(DebtFilePath, _debts); // Save the updated list back to the JSON file
-        NotifyStateChanged(); // Notify that the state has changed
-    }
-}
-
-        // Get all transactions (CashInflow, CashOutflow, and Debt combined)
-        public List<object> GetAllTransactions()
-        {
-            // Combine all transactions into a single list
-            return _cashInflows.Cast<object>()
-                .Concat(_cashOutflows.Cast<object>())
-                .Concat(_debts.Cast<object>())
-                .ToList();
-        }
-
-        // Get all CashInflow transactions
+        // Get all transactions
         public List<CashInflow> GetAllCashInflows() => _cashInflows;
-
-        // Get all CashOutflow transactions
         public List<CashOutflow> GetAllCashOutflows() => _cashOutflows;
-
-        // Get all Debt transactions
         public List<Debt> GetAllDebts() => _debts;
 
-        // Get Total Cash Inflow
-        public decimal GetTotalCashInflow() => _cashInflows.Sum(t => t.Amount);
-
-        // Get Total Cash Outflow
-        public decimal GetTotalCashOutflow() => _cashOutflows.Sum(t => t.Amount);
-
-        // Get Total Debt
-        public decimal GetTotalDebt() => _debts.Sum(d => d.Amount);
-
-        public decimal GetClearedDebt()
-        {
-            return _debts.Where(d => d.IsCleared).Sum(d => d.Amount);
-        }
-
-        public decimal GetRemainingDebt()
-        {
-            return _debts.Where(d => !d.IsCleared).Sum(d => d.Amount);
-        }
-
-
         // Get Available Balance (Cash Inflow - Cash Outflow + Debt)
-        public decimal GetAvailableBalance() =>
-            GetTotalCashInflow() - GetTotalCashOutflow() + GetTotalDebt();
+        public decimal GetAvailableBalance() => GetTotalCashInflow() - GetTotalCashOutflow() + GetTotalDebt();
 
-        // Method to notify UI updates
+        // Get totals
+        public decimal GetTotalCashInflow() => _cashInflows.Sum(t => t.Amount);
+        public decimal GetTotalCashOutflow() => _cashOutflows.Sum(t => t.Amount);
+        public decimal GetTotalDebt() => _debts.Sum(d => d.Amount);
+        public decimal GetClearedDebt() => _debts.Where(d => d.IsCleared).Sum(d => d.Amount);
+        public decimal GetRemainingDebt() => _debts.Where(d => !d.IsCleared).Sum(d => d.Amount);
+
+        // Update available balance when debt is cleared or added
+        public void UpdateAvailableBalance(decimal debtAmount)
+        {
+            var updatedBalance = CurrentBalance - debtAmount;
+            NotifyStateChanged();
+        }
+
+        // Notify UI updates
         private void NotifyStateChanged() => OnChange?.Invoke();
 
         // Save data to JSON file
@@ -166,11 +129,11 @@ namespace ExpenseTracker.Services
         }
 
         // Load data from JSON file
-        private List<User> LoadData<User>(string filePath)
+        private List<T>? LoadData<T>(string filePath)
         {
             if (!File.Exists(filePath)) return null;
             var json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<User>>(json);
+            return JsonSerializer.Deserialize<List<T>>(json);
         }
     }
 }
